@@ -17,3 +17,7 @@ def import_raw_data():
         print(data.columns)
 
     return pd.concat(imported_data, ignore_index=True)
+
+def load_database():
+
+    pass

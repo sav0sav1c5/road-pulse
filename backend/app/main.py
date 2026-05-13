@@ -1,27 +1,21 @@
-import os
-from dotenv import load_dotenv
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy.orm import Session
+from db.database import engine, get_db, Base
+from models.accident import Accident
+from schemas.accident import AccidentResponse
 
-import scripts.import_data as id
-import models.accident as acc
+Base.metadata.create_all(bind=engine)
 
-if __name__ == "__main__":
+app = FastAPI(title='Road Pulse API', version='1.0')
 
-    # Load raw data to dataframe
-    # data = id.import_raw_data()
+@app.get('/accident/{accident_id}', response_model=AccidentResponse)
+def get_accident(accident_id: int, db: Session = Depends(get_db)):
+    
+    # Find first accident with passed 'accident_id'
+    accident = db.query(Accident).filter(Accident.accident_id == accident_id).first()
 
-    # Connect with database
-    load_dotenv()
-    database_url = os.getenv("DATABASE_URL")
-    engine = create_engine(database_url)
+    # Not Found - return status 404
+    if accident is None:
+        raise HTTPException(status_code=404, detail="Accident with this ID not found.")
 
-    # Creating tables
-    acc.Base.metadata.create_all(engine)
-
-    # Creating sesstion for loading of data
-    Session = sessionmaker(bind=engine)
-    session = Session()
-
-    # Load data in tables
-    id.load_database(session)
+    return accident

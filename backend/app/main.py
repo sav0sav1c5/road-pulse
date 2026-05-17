@@ -1,27 +1,18 @@
-import os
-from dotenv import load_dotenv
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from fastapi import FastAPI
+from db.database import engine, Base
+from api.accidents import router
 
-import scripts.import_data as id
-import models.accident as acc
+Base.metadata.create_all(bind=engine)
 
-if __name__ == "__main__":
+app = FastAPI(title='Road Pulse API', version='1.0')
 
-    # Load raw data to dataframe
-    # data = id.import_raw_data()
+# Add all endpoints from router
+app.include_router(router=router)
 
-    # Connect with database
-    load_dotenv()
-    database_url = os.getenv("DATABASE_URL")
-    engine = create_engine(database_url)
-
-    # Creating tables
-    acc.Base.metadata.create_all(engine)
-
-    # Creating sesstion for loading of data
-    Session = sessionmaker(bind=engine)
-    session = Session()
-
-    # Load data in tables
-    id.load_database(session)
+# Health check method
+@app.get('/health')
+def health_check():
+    return {
+        "status": "ok",
+        "database": "connected"
+    }

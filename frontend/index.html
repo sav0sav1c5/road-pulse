@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saobraćajne nezgode</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --font: 'IBM Plex Sans', sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+    --bg: #f0efe9;
+    --surface: #ffffff;
+    --surface2: #f5f4f0;
+    --border: #e2e0d6;
+    --border2: #cccab6;
+    --text: #1a1917;
+    --muted: #6b6960;
+    --faint: #9b9a92;
+    --accent: #1d4ed8;
+    --accent-bg: #eff3ff;
+    --danger: #b91c1c;
+    --danger-bg: #fef2f2;
+    --warn: #92400e;
+    --warn-bg: #fffbeb;
+    --ok: #166534;
+    --ok-bg: #f0fdf4;
+    --radius: 6px;
+    --radius-lg: 10px;
+  }
+  html, body { height: 100%; overflow: hidden; font-family: var(--font); font-size: 14px; background: var(--bg); color: var(--text); }
+ 
+  #app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+ 
+  /* TOPBAR */
+  #topbar {
+    height: 50px; flex-shrink: 0;
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; padding: 0 18px;
+  }
+  .logo { display: flex; align-items: center; gap: 9px; }
+  .logo-icon { width: 28px; height: 28px; border-radius: var(--radius); background: var(--text); display: flex; align-items: center; justify-content: center; }
+  .logo-icon svg { width: 15px; height: 15px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; }
+  .logo-title { font-weight: 500; font-size: 15px; letter-spacing: -0.01em; }
+  .chip { font-size: 12px; color: var(--muted); background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 2px 10px; }
+ 
+  /* MAIN SPLIT */
+  #main { flex: 1; display: flex; overflow: hidden; }
+ 
+  /* LEFT PANE */
+  #left-pane { width: 52%; flex-shrink: 0; display: flex; flex-direction: column; border-right: 1px solid var(--border); background: var(--surface); overflow: hidden; }
+  .pane-header { padding: 9px 14px; border-bottom: 1px solid var(--border); font-size: 10.5px; color: var(--faint); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; }
+  .table-scroll { flex: 1; overflow-y: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; table-layout: fixed; }
+  col.c-id   { width: 78px; }
+  col.c-date { width: 100px; }
+  col.c-mun  { width: 90px; }
+  col.c-type { width: 96px; }
+  thead th {
+    position: sticky; top: 0; z-index: 2; background: var(--surface2);
+    border-bottom: 1px solid var(--border); padding: 7px 11px; text-align: left;
+    font-weight: 500; font-size: 10.5px; color: var(--faint);
+    text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.08s; }
+  tbody tr:hover { background: #eef1fb; }
+  tbody tr.selected { background: var(--accent-bg) !important; }
+  tbody td { padding: 8px 11px; vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .td-id   { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .td-date { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .td-mun  { font-weight: 500; }
+  .td-desc { color: var(--muted); font-size: 12px; }
+  .badge { display: inline-block; font-size: 10px; padding: 1px 7px; border-radius: 20px; font-weight: 500; white-space: nowrap; }
+  .badge-danger  { background: var(--danger-bg); color: var(--danger); }
+  .badge-warn    { background: var(--warn-bg);   color: var(--warn); }
+  .badge-info    { background: var(--accent-bg); color: var(--accent); }
+  .badge-neutral { background: var(--surface2);  color: var(--muted); border: 1px solid var(--border); }
+ 
+  /* PAGINATION */
+  #pagination { flex-shrink: 0; border-top: 1px solid var(--border); padding: 7px 14px; display: flex; align-items: center; justify-content: space-between; background: var(--surface2); }
+  .page-info { font-size: 11px; color: var(--muted); }
+  .page-btns { display: flex; gap: 3px; }
+  .page-btn { border: 1px solid var(--border); background: var(--surface); border-radius: var(--radius); padding: 3px 10px; font: 11.5px var(--font); cursor: pointer; color: var(--text); transition: background 0.1s; }
+  .page-btn:hover:not(:disabled) { background: var(--border); }
+  .page-btn:disabled { opacity: 0.35; cursor: default; }
+ 
+  /* RIGHT PANE */
+  #right-pane { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+ 
+  /* DETAIL */
+  #detail-area { flex: 1; overflow-y: auto; padding: 16px; background: var(--bg); }
+  .empty-state { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: var(--faint); }
+  .empty-state svg { width: 36px; height: 36px; stroke: var(--border2); fill: none; stroke-width: 1.5; stroke-linecap: round; }
+  .empty-state p { font-size: 13px; }
+  .detail-title-row { display: flex; align-items: center; gap: 9px; margin-bottom: 14px; flex-wrap: wrap; }
+  .detail-id { font-size: 16px; font-weight: 500; letter-spacing: -0.02em; }
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 7px; margin-bottom: 9px; }
+  .metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 9px 11px; }
+  .metric-label { font-size: 10px; color: var(--faint); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .metric-val { font-size: 13px; font-weight: 500; }
+  .info-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 11px 13px; margin-bottom: 8px; }
+  .info-label { font-size: 10px; color: var(--faint); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 4px; }
+  .info-val { font-size: 13px; line-height: 1.55; }
+ 
+  /* PREDICT */
+  #predict-area { flex-shrink: 0; padding: 12px 16px; background: var(--surface); border-top: 1px solid var(--border); }
+  .predict-heading { font-size: 10.5px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 9px; display: flex; align-items: center; gap: 6px; }
+  .predict-heading svg { width: 13px; height: 13px; stroke: var(--accent); fill: none; stroke-width: 2; stroke-linecap: round; }
+  .predict-fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; margin-bottom: 7px; }
+  .field-label { display: block; font-size: 10px; color: var(--faint); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .field-input, .field-textarea {
+    width: 100%; border: 1px solid var(--border2); border-radius: var(--radius);
+    padding: 5px 9px; font: 12.5px var(--font); color: var(--text); background: var(--surface2);
+    outline: none; transition: border-color 0.15s;
+  }
+  .field-input:focus, .field-textarea:focus { border-color: var(--accent); background: var(--surface); }
+  .predict-bottom-row { display: flex; gap: 7px; align-items: flex-end; }
+  .desc-wrap { flex: 1; }
+  .field-textarea { resize: none; height: 44px; font-size: 12px; }
+  .run-btn { flex-shrink: 0; background: var(--text); color: #fff; border: none; border-radius: var(--radius); padding: 0 18px; height: 44px; font: 500 13px var(--font); cursor: pointer; transition: opacity 0.15s; white-space: nowrap; }
+  .run-btn:disabled { opacity: 0.5; cursor: default; }
+  .run-btn:not(:disabled):hover { opacity: 0.82; }
+  #pred-result { flex-shrink: 0; display: flex; align-items: center; }
+  .result-pill { display: inline-flex; align-items: center; gap: 7px; border-radius: var(--radius); padding: 6px 13px; font-size: 12.5px; font-weight: 500; white-space: nowrap; }
+  .result-pill svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; flex-shrink: 0; }
+  .result-pill .prob { font-weight: 400; font-family: var(--mono); font-size: 11.5px; opacity: 0.8; }
+  .result-pill.danger { background: var(--danger-bg); color: var(--danger); }
+  .result-pill.warn   { background: var(--warn-bg);   color: var(--warn); }
+  .result-pill.ok     { background: var(--ok-bg);     color: var(--ok); }
+  .pred-error { font-size: 12px; color: var(--danger); }
+ 
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner { text-align: center; padding: 36px 0; color: var(--muted); font-size: 13px; }
+  .spin-svg { display: inline-block; animation: spin 0.85s linear infinite; vertical-align: middle; margin-right: 6px; }
+  .spin-svg svg { width: 17px; height: 17px; stroke: var(--border2); fill: none; stroke-width: 2; stroke-linecap: round; }
+</style>
+</head>
+<body>
+<div id="app">
+ 
+  <div id="topbar">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <span class="logo-title">Road Pulse Srbija</span>
+    </div>
+    <span class="chip" id="total-chip">Učitavanje...</span>
+  </div>
+ 
+  <div id="main">
+ 
+    <!-- LEFT: lista -->
+    <div id="left-pane">
+      <div class="pane-header">
+        <span>Lista nezgoda</span>
+        <span id="page-label" style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted)">—</span>
+      </div>
+      <div class="table-scroll">
+        <div class="spinner" id="list-spinner">
+          <span class="spin-svg"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg></span>Učitavanje...
+        </div>
+        <table id="acc-table" style="display:none">
+          <colgroup><col class="c-id"><col class="c-date"><col class="c-mun"><col class="c-type"><col></colgroup>
+          <thead>
+            <tr><th>ID</th><th>Datum</th><th>Opština</th><th>Tip</th><th>Opis</th></tr>
+          </thead>
+          <tbody id="acc-tbody"></tbody>
+        </table>
+      </div>
+      <div id="pagination">
+        <span class="page-info" id="page-info-text">—</span>
+        <div class="page-btns">
+          <button class="page-btn" id="btn-first">««</button>
+          <button class="page-btn" id="btn-prev">‹</button>
+          <button class="page-btn" id="btn-next">›</button>
+          <button class="page-btn" id="btn-last">»»</button>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- RIGHT: detalji + predikcija -->
+    <div id="right-pane">
+      <div id="detail-area">
+        <div class="empty-state" id="empty-state">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <p>← Kliknite na nezgodu za detalje</p>
+        </div>
+        <div id="detail-content" style="display:none">
+          <div class="detail-title-row">
+            <span class="detail-id" id="d-title">—</span>
+            <span class="badge" id="d-badge">—</span>
+          </div>
+          <div class="cards-grid" id="d-cards"></div>
+          <div class="info-card">
+            <div class="info-label">Vrsta učesnika</div>
+            <div class="info-val" id="d-vehicles">—</div>
+          </div>
+          <div class="info-card">
+            <div class="info-label">Opis</div>
+            <div class="info-val" id="d-desc">—</div>
+          </div>
+        </div>
+        <div class="spinner" id="detail-spinner" style="display:none">
+          <span class="spin-svg"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg></span>Učitavanje...
+        </div>
+      </div>
+ 
+      <div id="predict-area">
+        <div class="predict-heading">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Predikcija težine
+        </div>
+        <div class="predict-fields">
+          <div>
+            <label class="field-label">Opština</label>
+            <input class="field-input" id="p-municipality" type="text" placeholder="BARAJEVO">
+          </div>
+          <div>
+            <label class="field-label">Datum i vreme</label>
+            <input class="field-input" id="p-datetime" type="text" placeholder="YYYY-MM-DD HH:MM:SS">
+          </div>
+          <div>
+            <label class="field-label">Tip učesnika</label>
+            <input class="field-input" id="p-vehicles" type="text" placeholder="SN SA JEDNIM VOZILOM">
+          </div>
+        </div>
+        <div class="predict-bottom-row">
+          <div class="desc-wrap">
+            <label class="field-label">Opis</label>
+            <textarea class="field-textarea" id="p-desc" placeholder="Opis nezgode..."></textarea>
+          </div>
+          <button class="run-btn" id="predict-btn" onclick="runPredict()">Prediktuj</button>
+          <div id="pred-result"></div>
+        </div>
+      </div>
+    </div>
+ 
+  </div>
+</div>
+ 
+<script>
+const API = '/api/v1';
+let currentPage = 1;
+let totalPages = 1;
+const PAGE_SIZE = 20;
+ 
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function fmtDate(dt) {
+  if (!dt) return '—';
+  const d = new Date(dt);
+  return d.toLocaleDateString('sr-RS',{day:'2-digit',month:'2-digit',year:'numeric'})
+    +' '+d.toLocaleTimeString('sr-RS',{hour:'2-digit',minute:'2-digit'});
+}
+function typeBadge(type) {
+  if (!type) return ['badge-neutral','Nepoznato'];
+  const t = type.toLowerCase();
+  if (t.includes('poginulim'))  return ['badge-danger', type];
+  if (t.includes('povredjenim')) return ['badge-warn',  type];
+  return ['badge-info', type];
+}
+ 
+// LIST
+async function loadAccidents(page) {
+  document.getElementById('list-spinner').style.display = 'block';
+  document.getElementById('acc-table').style.display = 'none';
+  try {
+    const res = await fetch(`${API}/accidents?page=${page}&page_size=${PAGE_SIZE}`);
+    const data = await res.json();
+    const total = data.total || 0;
+    totalPages = Math.ceil(total / PAGE_SIZE);
+    currentPage = data.page;
+ 
+    document.getElementById('total-chip').textContent = total.toLocaleString('sr-RS') + ' nezgoda';
+    document.getElementById('page-label').textContent = `str. ${currentPage} / ${totalPages.toLocaleString('sr-RS')}`;
+    document.getElementById('page-info-text').textContent = `${((currentPage-1)*PAGE_SIZE+1).toLocaleString()}–${Math.min(currentPage*PAGE_SIZE,total).toLocaleString()} od ${total.toLocaleString()}`;
+ 
+    const tbody = document.getElementById('acc-tbody');
+    tbody.innerHTML = (data.items||[]).map(acc => {
+      const [cls,label] = typeBadge(acc.accident_type);
+      // accident_id is used for the /accident/{id} endpoint
+      return `<tr data-accid="${acc.accident_id}">
+        <td class="td-id">${esc(acc.accident_id)}</td>
+        <td class="td-date">${fmtDate(acc.date_time)}</td>
+        <td class="td-mun">${esc(acc.municipality)}</td>
+        <td><span class="badge ${cls}">${esc(label)}</span></td>
+        <td class="td-desc">${esc(acc.description)}</td>
+      </tr>`;
+    }).join('');
+ 
+    tbody.querySelectorAll('tr').forEach(tr => {
+      tr.addEventListener('click', () => {
+        tbody.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
+        tr.classList.add('selected');
+        openDetail(parseInt(tr.dataset.accid));
+      });
+    });
+ 
+    document.getElementById('btn-first').disabled = currentPage === 1;
+    document.getElementById('btn-prev').disabled  = currentPage === 1;
+    document.getElementById('btn-next').disabled  = currentPage === totalPages;
+    document.getElementById('btn-last').disabled  = currentPage === totalPages;
+ 
+    document.getElementById('list-spinner').style.display = 'none';
+    document.getElementById('acc-table').style.display = 'table';
+  } catch(e) {
+    document.getElementById('list-spinner').innerHTML = '<p style="color:var(--danger);padding:20px">Greška: proverite da li je backend pokrenut.</p>';
+  }
+}
+ 
+document.getElementById('btn-first').addEventListener('click', () => loadAccidents(1));
+document.getElementById('btn-prev').addEventListener('click',  () => loadAccidents(currentPage - 1));
+document.getElementById('btn-next').addEventListener('click',  () => loadAccidents(currentPage + 1));
+document.getElementById('btn-last').addEventListener('click',  () => loadAccidents(totalPages));
+ 
+// DETAIL — uses accident_id (the real business ID) for the API call
+async function openDetail(accidentId) {
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('detail-content').style.display = 'none';
+  document.getElementById('detail-spinner').style.display = 'block';
+  document.getElementById('pred-result').innerHTML = '';
+ 
+  try {
+    const res = await fetch(`${API}/accident/${accidentId}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const acc = await res.json();
+ 
+    document.getElementById('d-title').textContent = `Nezgoda #${acc.accident_id}`;
+    const [cls, label] = typeBadge(acc.accident_type);
+    const badge = document.getElementById('d-badge');
+    badge.className = 'badge ' + cls;
+    badge.textContent = label;
+ 
+    document.getElementById('d-cards').innerHTML = [
+      { label:'Okrug',       val: acc.department },
+      { label:'Opština',     val: acc.municipality },
+      { label:'Datum/vreme', val: fmtDate(acc.date_time) },
+      { label:'Koordinate',  val: acc.latitude ? `${acc.latitude.toFixed(4)}, ${acc.longitude.toFixed(4)}` : '—' },
+    ].map(c=>`<div class="metric-card"><div class="metric-label">${esc(c.label)}</div><div class="metric-val">${esc(c.val)}</div></div>`).join('');
+ 
+    document.getElementById('d-vehicles').textContent = acc.involved_vehicles_num || '—';
+    document.getElementById('d-desc').textContent     = acc.description || '—';
+ 
+    // prefill predict
+    document.getElementById('p-municipality').value = acc.municipality || '';
+    document.getElementById('p-datetime').value     = (acc.date_time||'').replace('T',' ').slice(0,19);
+    document.getElementById('p-vehicles').value     = acc.involved_vehicles_num || '';
+    document.getElementById('p-desc').value         = acc.description || '';
+ 
+    document.getElementById('detail-spinner').style.display = 'none';
+    document.getElementById('detail-content').style.display = 'block';
+  } catch(e) {
+    document.getElementById('detail-spinner').innerHTML = `<p style="color:var(--danger);padding:20px">Greška (${esc(e.message)})</p>`;
+  }
+}
+ 
+// PREDICT
+async function runPredict() {
+  const btn = document.getElementById('predict-btn');
+  const resBox = document.getElementById('pred-result');
+  btn.disabled = true; btn.textContent = '...';
+  resBox.innerHTML = '';
+ 
+  try {
+    const body = {
+      municipality:          document.getElementById('p-municipality').value,
+      date_time:             document.getElementById('p-datetime').value,
+      involved_vehicles_num: document.getElementById('p-vehicles').value,
+      description:           document.getElementById('p-desc').value,
+    };
+    const res = await fetch(`${API}/predict`, {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+    });
+    if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.detail||`HTTP ${res.status}`); }
+    const data = await res.json();
+ 
+    const sev = data.severity || '';
+    const isDanger = /injur|dead|pogin|povred/i.test(sev);
+    const isMat    = /material|mat\./i.test(sev);
+    const cls  = isDanger ? 'danger' : isMat ? 'warn' : 'ok';
+    const icon = isDanger
+      ? `<svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
+      : `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
+ 
+    resBox.innerHTML = `<span class="result-pill ${cls}">${icon}${esc(sev)}<span class="prob">${esc(data.probability)}</span></span>`;
+  } catch(e) {
+    resBox.innerHTML = `<span class="pred-error">⚠ ${esc(e.message)}</span>`;
+  }
+  btn.disabled = false; btn.textContent = 'Prediktuj';
+}
+ 
+loadAccidents(1);
+</script>
+</body>
+</html>

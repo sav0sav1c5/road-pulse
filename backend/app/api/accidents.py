@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
-from db.database import get_db
-from services.accident_service import get_all_accidents, get_accident_by_id
-from schemas.accident import AccidentResponse, AccidentList
+from backend.app.db.database import get_db
+from backend.app.services.accident_service import get_all_accidents, get_accident_by_id
+from backend.app.services.prediction_service import predict_severity
+from backend.app.schemas.accident import AccidentResponse, AccidentList
+from backend.app.schemas.prediction import PredictionRequest, PredictionResponse
 
 router = APIRouter(prefix='/api/v1', tags=['accidents'])
 
@@ -34,3 +36,16 @@ def get_accident(
         raise HTTPException(status_code=404, detail=f"Accident with ID {accident_id} not found.")
     
     return accident
+
+@router.post('/predict', response_model=PredictionResponse)
+def predict(
+    request: PredictionRequest
+):
+    result = predict_severity(
+        municipality=request.municipality,
+        description=request.description,
+        involved_vehicles_num=request.involved_vehicles_num,
+        date_time=request.date_time
+    )
+
+    return result

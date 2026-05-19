@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from models.accident import Accident
+from backend.app.models.accident import Accident
 
 # Get accidents with pagination
 def get_all_accidents(db: Session, page: int, page_size: int):

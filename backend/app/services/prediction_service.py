@@ -64,11 +64,11 @@ def predict_severity(
         "probability": f"{probability}%"
     }
 
-if __name__ == "__main__":
-    result = predict_severity(
-        municipality="BARAJEVO",
-        description="Nezgoda sa jednim vozilom – silazak sa kolovoza u krivini",
-        involved_vehicles_num="SN SA JEDNIM VOZILOM",
-        date_time="2024-03-15 17:30:00"
-    )
-    print(result)
+# if __name__ == "__main__":
+#     result = predict_severity(
+#         municipality="BARAJEVO",
+#         description="Nezgoda sa jednim vozilom – silazak sa kolovoza u krivini",
+#         involved_vehicles_num="SN SA JEDNIM VOZILOM",
+#         date_time="2024-03-15 17:30:00"
+#     )
+#     print(result)

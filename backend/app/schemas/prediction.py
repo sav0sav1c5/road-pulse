@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from pydantic import BaseModel
 
 class PredictionRequest(BaseModel):
@@ -9,4 +9,4 @@ class PredictionRequest(BaseModel):
 
 class PredictionResponse(BaseModel):
     severity: str
-    probability: float
+    probability: str

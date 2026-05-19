@@ -1,5 +1,5 @@
 import pandas as pd
-from  backend.app.models.accident import Accident
+from app.models.accident import Accident
 
 RAW_PATH = "data/raw/nez-opendata-202.xlsx"
 

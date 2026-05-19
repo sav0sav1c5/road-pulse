@@ -1,10 +1,8 @@
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder
 
-def _encode_municipality(df):
-    le = LabelEncoder()
-    df['municipality_encoded'] = le.fit_transform(df['municipality'])
+def _encode_municipality(df, le_municipality):
+    df['municipality_encoded'] = le_municipality.transform(df['municipality'])
 
     df = df.drop(columns='municipality')
 
@@ -53,43 +51,42 @@ def _encode_involved_vehicles(df):
 
     return df
 
-def _encode_description(df):
-    le = LabelEncoder()
-    df['description_encoded'] = le.fit_transform(df['description'])
+def _encode_description(df, le_description):
+    df['description_encoded'] = le_description.transform(df['description'])
 
     df = df.drop(columns='description')
 
     return df
 
-def _encode_target_accident_type(df):
-    mapping = {
-        'Sa mat.stetom': 'material',
-        'Sa povredjenim': 'injured',
-        'Sa poginulim': 'dead',
-    }
+# def _encode_target_accident_type(df):
+#     mapping = {
+#         'Sa mat.stetom': 'material',
+#         'Sa povredjenim': 'injured',
+#         'Sa poginulim': 'dead',
+#     }
 
-    df['accident_type'] = df['accident_type'].astype(str).str.strip()
-    df['accident_type'] = df['accident_type'].replace(mapping)
+#     df['accident_type'] = df['accident_type'].astype(str).str.strip()
+#     df['accident_type'] = df['accident_type'].replace(mapping)
     
-    df['accident_type'] = (df['accident_type'] != 'material').astype(int)
+#     df['accident_type'] = (df['accident_type'] != 'material').astype(int)
 
-    return df
+#     return df
 
 def _drop_unused_columns(df):
-    columns = ['accident_id', 'department', 'longitude', 'latitude']
+    columns = ['accident_id', 'department', 'longitude', 'latitude', 'year', 'accident_type']
     
-    df = df.drop(columns=columns)
+    df = df.drop(columns=columns, errors='ignore')
 
     return df
 
-def preprocess(df: pd.DataFrame) -> pd.DataFrame:
+def preprocess(df: pd.DataFrame, le_municipality, le_description) -> pd.DataFrame:
     df = df.copy()
 
-    df = _encode_municipality(df)
+    df = _encode_municipality(df, le_municipality)
     df = _extract_datetime_features(df)
     df = _encode_involved_vehicles(df)
-    df = _encode_description(df)
-    df = _encode_target_accident_type()
+    df = _encode_description(df, le_description)
+    # df = _encode_target_accident_type(df)
     df = _drop_unused_columns(df)
 
     return df

@@ -54,8 +54,13 @@ def get_stats_by_year(db: Session):
     return [{'label': str(int(row.year)), 'count': row.count} for row in rows]
 
 # Get accident stats by accident type
-def get_stats_by_accident_type():
+def get_stats_by_accident_type(db: Session):
     
-    rows = ()
+    rows = (
+        db.query(Accident.accident_type, func.count(Accident.id).label('count'))
+        .group_by(Accident.accident_type)
+        .order_by(func.count(Accident.id).desc())
+        .all()
+    )
 
-    return rows
+    return [{'label': row.accident_type, 'count': row.count} for row in rows]

@@ -1,3 +1,4 @@
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from backend.app.models.accident import Accident
 
@@ -17,17 +18,33 @@ def get_accident_by_id(db: Session, accident_id: int):
     return db.query(Accident).filter(Accident.accident_id == accident_id).first()
 
 # Get accident stats by police deparment
-def get_stats_by_department():
-    pass
+def get_stats_by_department(db: Session):
+    
+    rows = (
+        db.query(Accident.department, func.count(Accident.id).label('count'))
+        .group_by(Accident.department)
+        .all()
+    )
+
+    return [{'label': row.department, 'count': row.count} for row in rows]
 
 # Get accident stats by hour
-def get_stats_by_hour():
-    pass
+def get_stats_by_hour(db: Session):
+    
+    rows = ()
+
+    return rows
 
 # Get accident stats by year
-def get_stats_by_year():
-    pass
+def get_stats_by_year(db: Session):
+    
+    rows = ()
+
+    return rows
 
 # Get accident stats by accident type
 def get_stats_by_accident_type():
-    pass
+    
+    rows = ()
+
+    return rows

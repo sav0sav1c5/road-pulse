@@ -22,3 +22,13 @@ class AccidentList(BaseModel):
     page: int
     page_size: int
     items: List[AccidentResponse]
+
+# Universal statistics classes
+
+class StatsItem(BaseModel):
+    label: str
+    count: int
+
+class StatsList(BaseModel):
+    total_items: int
+    items: List[StatsItem]

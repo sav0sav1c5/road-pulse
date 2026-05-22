@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from backend.app.db.database import get_db
-from backend.app.services.accident_service import get_all_accidents, get_accident_by_id, get_stats_by_department, get_stats_by_hour
+from backend.app.services.accident_service import get_all_accidents, get_accident_by_id, get_stats_by_department, get_stats_by_hour, get_stats_by_year
 from backend.app.services.prediction_service import predict_severity
 from backend.app.schemas.accident import AccidentResponse, AccidentList, StatsList
 from backend.app.schemas.prediction import PredictionRequest, PredictionResponse
@@ -43,6 +43,15 @@ def stats_by_department(
 ):
 
     items = get_stats_by_department(db)
+
+    return StatsList(total_items=len(items), items=items)
+
+@router.get('/accident/statistics/year', response_model=StatsList)
+def stats_by_year(
+    db: Session = Depends(get_db)
+):
+    
+    items = get_stats_by_year(db)
 
     return StatsList(total_items=len(items), items=items)
 

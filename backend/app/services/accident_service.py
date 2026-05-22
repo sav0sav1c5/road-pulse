@@ -44,9 +44,14 @@ def get_stats_by_hour(db: Session):
 # Get accident stats by year
 def get_stats_by_year(db: Session):
     
-    rows = ()
+    rows = (
+        db.query(extract('year', Accident.date_time).label('year'), func.count(Accident.id).label('count'))
+        .group_by('year')
+        .order_by(func.count('year'))
+        .all()
+    )
 
-    return rows
+    return [{'label': str(int(row.year)), 'count': row.count} for row in rows]
 
 # Get accident stats by accident type
 def get_stats_by_accident_type():

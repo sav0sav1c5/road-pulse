@@ -1,4 +1,4 @@
-from sqlalchemy import func
+from sqlalchemy import func, extract
 from sqlalchemy.orm import Session
 from backend.app.models.accident import Accident
 
@@ -23,6 +23,7 @@ def get_stats_by_department(db: Session):
     rows = (
         db.query(Accident.department, func.count(Accident.id).label('count'))
         .group_by(Accident.department)
+        .order_by(func.count(Accident.id).desc())
         .all()
     )
 
@@ -31,9 +32,14 @@ def get_stats_by_department(db: Session):
 # Get accident stats by hour
 def get_stats_by_hour(db: Session):
     
-    rows = ()
+    rows = (
+        db.query(extract('hour', Accident.date_time).label('hour'), func.count(Accident.id).label('count'))
+        .group_by('hour')
+        .order_by(func.count(Accident.id).desc())
+        .all()
+    )
 
-    return rows
+    return [{'label': str(int(row.hour)), 'count': row.count} for row in rows]
 
 # Get accident stats by year
 def get_stats_by_year(db: Session):

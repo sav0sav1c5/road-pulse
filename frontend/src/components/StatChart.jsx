@@ -9,7 +9,7 @@ function StatChart({ title, data }) {
             <h2 style={styles.chartTitle}>{title}</h2>
 
             {/* ResponsiveContainer — automatically expands to the width of the parent */}
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={245}>
 
                 {/* BarChart — knows these are bar graphs, receives an array of objects */}
                 <BarChart data={data} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>

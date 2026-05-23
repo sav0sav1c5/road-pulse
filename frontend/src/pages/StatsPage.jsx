@@ -113,16 +113,28 @@ function StatsPage() {
                             </div>
 
                         </div>
-                        {/* Graphs - row 1 */}
-                        <div style={styles.chartGrid}>
-                            <StatChart title="Accidents per hour per day" data={hourChartData} />
-                            <StatChart title="Accidents by year" data={yearChartData} />
-                        </div>
+                        <div style={styles.twoCol}>
+                            {/* Left column main */}
+                            <div style={styles.leftCol}>
+                                {/* Graphs - row 1 */}
+                                <div style={styles.chartGrid}>
+                                    <StatChart title="Accidents per hour per day" data={hourChartData} />
+                                    <StatChart title="Accidents by year" data={yearChartData} />
+                                </div>
 
-                        {/* Graphs - row 2 */}
-                        <div style={styles.chartGrid}>
-                            <StatChart title="Accidents by type" data={typeChartData} />
-                            <StatChart title="Accidents by police department" data={deptChartData} />
+                                {/* Graphs - row 2 */}
+                                <div style={styles.chartGrid}>
+                                    <StatChart title="Accidents by type" data={typeChartData} />
+                                    <StatChart title="Accidents by police department" data={deptChartData} />
+                                </div>
+                            </div>
+
+                            {/* Right column main */}
+                            <div style={styles.rightCol}>
+                                <div style={styles.placeholder}>
+                                Accident list - comming soon
+                                </div>
+                            </div>
                         </div>
                     </>
                 )}
@@ -188,9 +200,36 @@ const styles = {
     },
     chartGrid: {
         display: 'grid',
-        gridTemplateColumns: '1fr 1fr',  // Two charts in one row
+        gridTemplateColumns: '1fr 1fr',         // Two charts in one row
         gap: '1rem',
-        marginBottom: '1rem',
+    },
+    twoCol: {
+        display: 'flex',
+        gap: '1rem',
+        flex: 1,                                // takes all vertical space
+        minHeight: 0,
+    },
+    leftCol: {
+        flex: '1 1 0',                          // grows and shrinks starting from 0
+        minWidth: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem',
+    },
+    rightCol: {
+        width: '340px',
+        minWidth: '340px',                      // fix width
+        display: 'flex',
+        flexDirection: 'column',
+    },
+    placeholder: {
+        backgroundColor: 'var(--bg-card)',
+        border: '1px solid var(--border)',
+        borderRadius: '10px',
+        padding: '1.25rem',
+        color: 'var(--text-muted)',
+        fontSize: '13px',
+        flex: 1,
     },
 }
 

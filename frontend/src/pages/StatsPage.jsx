@@ -136,9 +136,7 @@ function StatsPage() {
 
                             {/* Right column main */}
                             <div style={styles.rightCol}>
-                                <div style={styles.placeholder}>
-                                    <AccidentsFeed/>
-                                </div>
+                                <AccidentsFeed />
                             </div>
                         </div>
                     </>
@@ -220,12 +218,14 @@ const styles = {
         display: 'flex',
         flexDirection: 'column',
         gap: '1rem',
+        height: '100%', 
     },
     rightCol: {
         width: '340px',
         minWidth: '340px',                      // fix width
         display: 'flex',
         flexDirection: 'column',
+        height: '100%', 
     },
     placeholder: {
         backgroundColor: 'var(--bg-card)',

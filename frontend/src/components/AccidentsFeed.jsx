@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getAccidents, getStatsByDepartment, getStatsByType } from '../api/accidents'
+import { getAccidents, getStatsByDepartment, getStatsByType , getStatsByMunicipality } from '../api/accidents'
 
 function AccidentsFeed() {
     const [accidents, setAccidents] = useState([])
@@ -12,11 +12,13 @@ function AccidentsFeed() {
     const [filters, setFilters] = useState({
         department: '',
         accident_type: '',
+        municipality: ''
     })
 
     // Dropdown options (load them once)
     const [departments, setDepartments] = useState([])
     const [accidentTypes, setAccidentTypes] = useState([])
+    const [municipalities, setMunicipalities] = useState([])
 
     // Load filter options in mount
     useEffect(() => {
@@ -26,6 +28,9 @@ function AccidentsFeed() {
 
         getStatsByType()
             .then(data => setAccidentTypes(data.items.map(i => i.label)))
+            .catch(() => {})
+        getStatsByMunicipality()
+            .then(data => setMunicipalities(data.items.map(i => i.label)))
             .catch(() => {})
     }, [])
 
@@ -62,14 +67,16 @@ function AccidentsFeed() {
 
             {/* Filters */}
             <div style={styles.filters}>
+
+                {/* Prvi red — departman i tip */}
                 <select
                     style={styles.select}
                     value={filters.department}
                     onChange={e => handleFilterChange('department', e.target.value)}
                 >
-                <option value="">All departments</option>
-                    {departments.map(dept => (
-                        <option key={dept} value={dept}>{dept}</option>
+                    <option value="">All departments</option>
+                    {   departments.map(dept => (
+                    <option key={dept} value={dept}>{dept}</option>
                     ))}
                 </select>
 
@@ -78,20 +85,33 @@ function AccidentsFeed() {
                     value={filters.accident_type}
                     onChange={e => handleFilterChange('accident_type', e.target.value)}
                 >
-                <option value="">Svi tipovi</option>
-                    {accidentTypes.map(type => (
-                        <option key={type} value={type}>{type}</option>
+                    <option value="">All types</option>
+                        {accidentTypes.map(type => (
+                    <option key={type} value={type}>{type}</option>
                     ))}
                 </select>
+
+                {/* Drugi red — municipality sam, zauzima ceo red */}
+                <select
+                    style={{ ...styles.select, gridColumn: '1 / -1' }}
+                    value={filters.municipality}
+                    onChange={e => handleFilterChange('municipality', e.target.value)}
+                >
+                    <option value="">All municipalities</option>
+                        {municipalities.map(m => (
+                    <option key={m} value={m}>{m}</option>
+                    ))}
+                </select>
+
             </div>
 
             {/* List */}
             <div style={styles.list}>
                 {loading && (
-                    <p style={styles.statusText}>Učitavanje...</p>
+                    <p style={styles.statusText}>Loading...</p>
                 )}
                 {error && (
-                    <p style={styles.errorText}>Greška: {error}</p>
+                    <p style={styles.errorText}>Error: {error}</p>
                 )}
                 {!loading && !error && accidents.map(acc => (
                     <AccidentItem key={acc.id} accident={acc} />
@@ -161,7 +181,8 @@ const styles = {
         gap: '1rem',
         flex: 1,
         minHeight: 0,
-        overflow: 'hidden',
+        overflow: 'auto',
+        maxHeight: '100%'
     },
     header: {
         display: 'flex',
@@ -182,8 +203,8 @@ const styles = {
         border: '1px solid var(--border)',
     },
     filters: {
-        display: 'flex',
-        flexDirection: 'column',
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
         gap: '6px',
     },
     select: {

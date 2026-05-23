@@ -11,8 +11,14 @@ async function apiFetch(path) {
     return response.json();
 }
 
-export function getAccidents(page = 1, pageSize = 20) {
-    return apiFetch(`/accidents?page=${page}&page_size=${pageSize}`);
+export function getAccidents(page = 1, pageSize = 20, filters = {}) {
+    const params = new URLSearchParams({ page, page_size: pageSize })
+
+    if (filters.department)    params.append('department', filters.department)
+    if (filters.accident_type) params.append('accident_type', filters.accident_type)
+    if (filters.municipality)  params.append('municipality', filters.municipality)
+
+    return apiFetch(`/accidents?${params.toString()}`)
 }
 
 export function getAccidentById(id) {
@@ -21,6 +27,10 @@ export function getAccidentById(id) {
 
 export function getStatsByDepartment() {
     return apiFetch(`/accidents/statistics/department`);
+}
+
+export function getStatsByMunicipality() {
+    return apiFetch(`/accidents/statistics/municipality`)
 }
 
 export function getStatsByYear() {

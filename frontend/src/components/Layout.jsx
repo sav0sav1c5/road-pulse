@@ -130,7 +130,7 @@ const styles = {
     },
     main: {
         flex: 1,                   // takes all left out space
-        overflowY: 'auto',         // scroll just through main, not all page
+        overflowY: 'hidden',         // scroll just through main, not all page
         backgroundColor: 'var(--bg-primary)',
     },
 }

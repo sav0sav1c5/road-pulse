@@ -1,7 +1,8 @@
+
 function PredictPage() {
-    return(
-        <div></div>
+    return (
+        <div>Prediction - soon</div>
     );
 }
 
-export default PredictPage;
+export default PredictPage

@@ -1,7 +1,8 @@
+
 function StatsPage() {
-    return(
-        <div></div>
+    return (
+        <div>Statistics - soon</div>
     );
 }
 
-export default StatsPage;
+export default StatsPage

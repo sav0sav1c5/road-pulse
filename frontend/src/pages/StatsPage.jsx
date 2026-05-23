@@ -5,6 +5,7 @@ import {
     getStatsByHour,
     getStatsByType
 } from "../api/accidents";
+import StatChart from "../components/StatChart";
 
 function StatsPage() {
     const [deptData, setDeptData] = useState(null)
@@ -51,6 +52,26 @@ function StatsPage() {
         ? typeData.items[0]
         : null
     
+    // Data transformation for Recharts
+    const hourChartData = hourData
+        ? hourData.items
+            .slice()
+            .sort((a, b) => parseInt(a.label) - parseInt(b.label))
+            .map(item => ({ name: `${item.label}h`, count: item.count }))
+        : []
+
+    const yearChartData = yearData
+        ? yearData.items.map(item => ({ name: item.label, count: item.count }))
+        : []
+
+    const typeChartData = typeData
+        ? typeData.items.map(item => ({ name: item.label, count: item.count }))
+        : []
+
+    const deptChartData = deptData
+        ? deptData.items.map(item => ({ name: item.label, count: item.count }))
+        : []
+
     return (
         <div style={styles.page}>
             <div style={styles.header}>
@@ -62,37 +83,48 @@ function StatsPage() {
                 {error   && <p style={{ color: 'var(--danger)' }}>Error: {error}</p>}
 
                 {!loading && !error && (
-                <div style={styles.statGrid}>
+                    <>
+                        <div style={styles.statGrid}>
+                            
+                            <div style={styles.statCard}>
+                                <div style={styles.statLabel}>Total accidents</div>
+                                <div style={styles.statValue}>
+                                    {totalAccidents.toLocaleString('en-US')}
+                                </div>
+                                <div style={styles.statSub}>in database</div>
+                            </div>
+                            <div style={styles.statCard}>
+                                <div style={styles.statLabel}>Busiest hour</div>
+                                <div style={styles.statValue}>
+                                    {busiestHour ? `${busiestHour.label}h` : '—'}
+                                </div>
+                                <div style={styles.statSub}>
+                                    {busiestHour ? `${busiestHour.count.toLocaleString('en-US')} accidents` : ''}
+                                </div>
+                            </div>
+                            <div style={styles.statCard}>
+                                <div style={styles.statLabel}>Most common type</div>
+                                <div style={{ ...styles.statValue, fontSize: '1rem' }}>
+                                    {topType ? topType.label : '—'}
+                                </div>
+                                <div style={styles.statSub}>
+                                    {topType ? `${topType.count.toLocaleString('en-US')} cases` : ''}
+                                </div>
+                            </div>
 
-                    <div style={styles.statCard}>
-                        <div style={styles.statLabel}>Total accidents</div>
-                        <div style={styles.statValue}>
-                            {totalAccidents.toLocaleString('en-US')}
                         </div>
-                        <div style={styles.statSub}>in database</div>
-                    </div>
+                        {/* Graphs - row 1 */}
+                        <div style={styles.chartGrid}>
+                            <StatChart title="Accidents per hour per day" data={hourChartData} />
+                            <StatChart title="Accidents by year" data={yearChartData} />
+                        </div>
 
-                    <div style={styles.statCard}>
-                        <div style={styles.statLabel}>Busiest hour</div>
-                        <div style={styles.statValue}>
-                            {busiestHour ? `${busiestHour.label}h` : '—'}
+                        {/* Graphs - row 2 */}
+                        <div style={styles.chartGrid}>
+                            <StatChart title="Accidents by type" data={typeChartData} />
+                            <StatChart title="Accidents by police department" data={deptChartData} />
                         </div>
-                        <div style={styles.statSub}>
-                            {busiestHour ? `${busiestHour.count.toLocaleString('en-US')} accidents` : ''}
-                        </div>
-                    </div>
-
-                    <div style={styles.statCard}>
-                        <div style={styles.statLabel}>Most common type</div>
-                        <div style={{ ...styles.statValue, fontSize: '1rem' }}>
-                            {topType ? topType.label : '—'}
-                        </div>
-                        <div style={styles.statSub}>
-                            {topType ? `${topType.count.toLocaleString('en-US')} cases` : ''}
-                        </div>
-                    </div>
-
-                </div>
+                    </>
                 )}
         </div>
     );
@@ -101,7 +133,9 @@ function StatsPage() {
 const styles = {
     page: {
         padding: '2rem',
-        maxWidth: '1100px',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
     },
     header: {
         display: 'flex',
@@ -122,7 +156,7 @@ const styles = {
         border: '1px solid var(--border)',
         color: 'var(--text-secondary)',
     },
-        statGrid: {
+    statGrid: {
         display: 'grid',
         gridTemplateColumns: 'repeat(3, 1fr)',  // three columns same width
         gap: '1rem',
@@ -141,16 +175,22 @@ const styles = {
         textTransform: 'uppercase',
         letterSpacing: '0.5px',
     },
-        statValue: {
+    statValue: {
         fontSize: '1.8rem',
         fontWeight: '600',
         color: 'var(--text-primary)',
         lineHeight: '1.2',
     },
-        statSub: {
+    statSub: {
         fontSize: '12px',
         color: 'var(--text-secondary)',
         marginTop: '4px',
+    },
+    chartGrid: {
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',  // Two charts in one row
+        gap: '1rem',
+        marginBottom: '1rem',
     },
 }
 

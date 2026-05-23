@@ -6,6 +6,9 @@ import {
     getStatsByType
 } from "../api/accidents";
 import StatChart from "../components/StatChart";
+import HorizontalBarChart from "../components/HorizontalBarChart";
+import AccidentTypePieChart from "../components/AccidentTypePieChart";
+import AccidentsFeed from "../components/AccidentsFeed";
 
 function StatsPage() {
     const [deptData, setDeptData] = useState(null)
@@ -69,7 +72,9 @@ function StatsPage() {
         : []
 
     const deptChartData = deptData
-        ? deptData.items.map(item => ({ name: item.label, count: item.count }))
+        ? deptData.items
+            .slice(0,10)
+            .map(item => ({ name: item.label, count: item.count }))
         : []
 
     return (
@@ -124,15 +129,15 @@ function StatsPage() {
 
                                 {/* Graphs - row 2 */}
                                 <div style={styles.chartGrid}>
-                                    <StatChart title="Accidents by type" data={typeChartData} />
-                                    <StatChart title="Accidents by police department" data={deptChartData} />
+                                    <AccidentTypePieChart title="Accidents by type" data={typeChartData} />
+                                    <HorizontalBarChart title="Accidents by police department" data={deptChartData} />
                                 </div>
                             </div>
 
                             {/* Right column main */}
                             <div style={styles.rightCol}>
                                 <div style={styles.placeholder}>
-                                Accident list - comming soon
+                                    <AccidentsFeed/>
                                 </div>
                             </div>
                         </div>

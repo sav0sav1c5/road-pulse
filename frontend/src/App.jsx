@@ -11,7 +11,6 @@ function App() {
             <Layout>
                 <Routes>
                     <Route path='/' element={<StatsPage/>}></Route>
-                    <Route path='/accidents' element={<AccidentsPage/>}></Route>
                     <Route path='/predict' element={<PredictPage/>}></Route>
                 </Routes>
             </Layout>

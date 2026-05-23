@@ -1,6 +1,7 @@
 import {
     BarChart, Bar, XAxis, YAxis, Tooltip,
-    ResponsiveContainer, CartesianGrid
+    ResponsiveContainer, CartesianGrid,
+    PieChart, Pie, Cell, Legend
 } from 'recharts'
 
 function StatChart({ title, data }) {

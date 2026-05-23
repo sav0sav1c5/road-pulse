@@ -3,7 +3,6 @@ import { NavLink } from "react-router-dom";
 // Navigation data with path and labels
 const NAV_ITEMS = [
     { to: '/',        label: 'Statistics',},
-    { to: '/accidents', label: 'Accidents',},
     { to: '/predict', label: 'Prediction'},
 ]
 

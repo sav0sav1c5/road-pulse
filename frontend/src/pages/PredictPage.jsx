@@ -1,7 +1,7 @@
-function PredictionPage() {
+function PredictPage() {
     return(
         <div></div>
     );
 }
 
-export default PredictionPage;
+export default PredictPage;

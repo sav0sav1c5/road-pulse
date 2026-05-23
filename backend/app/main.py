@@ -9,16 +9,17 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title='Road Pulse API', version='1.0')
 
-# Add all endpoints from router
-app.include_router(router=router)
-
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=['http://localhost:5173'],
+    allow_credentials=True,
     allow_methods=['*'],
-    allow_haeders=['*'],
+    allow_headers=['*'],
 )
+
+# Add all endpoints from router
+app.include_router(router=router)
 
 # Index (main) page
 @app.get('/')

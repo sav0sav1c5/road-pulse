@@ -57,11 +57,11 @@ def predict_severity(
     prediction = int(probability >= THRESHOLD)
 
     # Probability percentage
-    probability = round(probability * 100, 2)
+    # probability = round(probability * 100, 2)
 
     return {
         "severity": "Injured/Dead" if prediction == 1 else "Material",
-        "probability": f"{probability}%"
+        "probability": round(float(probability), 4)
     }
 
 # if __name__ == "__main__":

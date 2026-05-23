@@ -9,4 +9,4 @@ class PredictionRequest(BaseModel):
 
 class PredictionResponse(BaseModel):
     severity: str
-    probability: str
+    probability: float

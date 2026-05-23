@@ -8,6 +8,42 @@ from backend.app.schemas.prediction import PredictionRequest, PredictionResponse
 
 router = APIRouter(prefix='/api/v1', tags=['accidents'])
 
+@router.get('/accidents/statistics/department', response_model=StatsList)
+def stats_by_department(
+    db: Session = Depends(get_db)
+):
+
+    items = get_stats_by_department(db)
+
+    return StatsList(total_items=len(items), items=items)
+
+@router.get('/accidents/statistics/year', response_model=StatsList)
+def stats_by_year(
+    db: Session = Depends(get_db)
+):
+    
+    items = get_stats_by_year(db)
+
+    return StatsList(total_items=len(items), items=items)
+
+@router.get('/accidents/statistics/hour', response_model=StatsList)
+def stats_by_hour(
+    db: Session = Depends(get_db)
+):
+
+    items = get_stats_by_hour(db)
+
+    return StatsList(total_items=len(items), items=items)
+
+@router.get('/accidents/statistics/type', response_model=StatsList)
+def stats_by_type(
+    db: Session = Depends(get_db)
+):
+    
+    items = get_stats_by_accident_type(db)
+
+    return StatsList(total_items=len(items), items=items)
+
 @router.get('/accidents', response_model=AccidentList)
 def get_accidents(
     page: int = Query(1, ge=1, description="Page number"),
@@ -24,7 +60,7 @@ def get_accidents(
         items=items
     )
 
-@router.get('/accident/{accident_id}', response_model=AccidentResponse)
+@router.get('/accidents/{accident_id}', response_model=AccidentResponse)
 def get_accident(
     accident_id: int,
     db: Session = Depends(get_db)
@@ -36,42 +72,6 @@ def get_accident(
         raise HTTPException(status_code=404, detail=f"Accident with ID {accident_id} not found.")
     
     return accident
-
-@router.get('/accidents/statistics/department', response_model=StatsList)
-def stats_by_department(
-    db: Session = Depends(get_db)
-):
-
-    items = get_stats_by_department(db)
-
-    return StatsList(total_items=len(items), items=items)
-
-@router.get('/accident/statistics/year', response_model=StatsList)
-def stats_by_year(
-    db: Session = Depends(get_db)
-):
-    
-    items = get_stats_by_year(db)
-
-    return StatsList(total_items=len(items), items=items)
-
-@router.get('/accident/statistics/hour', response_model=StatsList)
-def stats_by_hour(
-    db: Session = Depends(get_db)
-):
-
-    items = get_stats_by_hour(db)
-
-    return StatsList(total_items=len(items), items=items)
-
-@router.get('/accident/statistics/type', response_model=StatsList)
-def stats_by_type(
-    db: Session = Depends(get_db)
-):
-    
-    items = get_stats_by_accident_type(db)
-
-    return StatsList(total_items=len(items), items=items)
 
 @router.post('/predict', response_model=PredictionResponse)
 def predict(

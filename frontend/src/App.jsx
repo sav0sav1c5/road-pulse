@@ -1,7 +1,7 @@
 import {BrowserRouter, Route, Routes, NavLink} from 'react-router-dom';
 import AccidentPage from './pages/AccidentsPage';
 import StatsPage from './pages/StatsPage';
-import PredictionPage from './pages/PredictPage';
+import PredictPage from './pages/PredictPage';
 
 import './App.css'
 
@@ -22,7 +22,7 @@ function App() {
                     <Routes>
                         <Route path='/' element={<AccidentPage/>}></Route>
                         <Route path='/statistics' element={<StatsPage/>}></Route>
-                        <Route path='/predict' element={<PredictionPage/>}></Route>
+                        <Route path='/predict' element={<PredictPage/>}></Route>
                     </Routes>
                 </main>
             </div>

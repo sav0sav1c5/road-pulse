@@ -24,7 +24,7 @@ export function getStatsByDepartment() {
 }
 
 export function getStatsByYear() {
-    return apifetch(`/accidents/statistics/year`);
+    return apiFetch(`/accidents/statistics/year`);
 }
 
 export function getStatsByHour() {
@@ -38,7 +38,7 @@ export function getStatsByType() {
 export function predictSeverity(data) {
     return fetch(`${BASE_URL}/predict`, {
         method: "POST",
-        header: {"Content-Type": "application.json"},
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify(data),
     }).then(res => {
         if (!res.ok) {

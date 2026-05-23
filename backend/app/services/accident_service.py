@@ -3,12 +3,30 @@ from sqlalchemy.orm import Session
 from backend.app.models.accident import Accident
 
 # Get accidents with pagination
-def get_all_accidents(db: Session, page: int, page_size: int):
+def get_all_accidents(
+        db: Session, 
+        page: int, 
+        page_size: int,
+        department: str = None,
+        municipality: str = None,
+        accident_type: str = None
+):
 
     offset = (page - 1) * page_size
+    query = db.query(Accident)
 
-    total = db.query(Accident).count()
-    items = db.query(Accident).offset(offset).limit(page_size).all()
+    # Filters
+    if department:
+        query = query.filter(Accident.department == department)
+
+    if municipality:
+        query = query.filter(Accident.municipality == municipality)
+
+    if accident_type:
+        query = query.filter(Accident.accident_type == accident_type)
+
+    total = query.count()
+    items = query.order_by(Accident.date_time.desc()).offset(offset).limit(page_size).all()
 
     return total, items
 
@@ -28,6 +46,18 @@ def get_stats_by_department(db: Session):
     )
 
     return [{'label': row.department, 'count': row.count} for row in rows]
+
+# Get accident stats by municipality
+def get_stats_by_municipality(db: Session):
+
+    rows = (
+        db.query(Accident.municipality, func.count(Accident.id).label('count'))
+        .group_by(Accident.municipality)
+        .order_by(func.count(Accident.id).desc())
+        .all()
+    )
+
+    return [{'label': row.municipality, 'count': row.count} for row in rows]
 
 # Get accident stats by hour
 def get_stats_by_hour(db: Session):

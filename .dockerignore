@@ -1,0 +1,15 @@
+.venv
+data/
+notebooks/
+.git/
+__pycache__/
+**/__pycache__/
+*.ipynb
+*.xlsx
+*.csv
+*.pkl
+frontend/
+docs/
+.venv/
+**/.venv/
+.venv

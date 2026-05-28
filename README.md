@@ -25,17 +25,21 @@ A live dashboard that visualizes the full accident dataset:
 - Filterable accident feed with pagination (by department, type, municipality)
 - Summary KPIs: total accidents, busiest hour, most common type
 
-### 2. Severity Predictor
+
+### 2. Accident Map
+
+An interactive map of Serbia showing individual accident locations as color-coded pins:
+- **Red** — fatal accidents (Sa poginulim)
+- **Orange** — accidents with injuries (Sa povredjenim)
+- **Blue** — material damage only (Sa mat. štetom)
+- Filterable by accident type and municipality
+- Click any pin to see location, type, and timestamp
+
+### 3. Severity Predictor
+
 A machine learning form that answers: *"Given these accident conditions — would this likely result in injuries, or just material damage?"*
-
-The user selects a municipality, date/time, vehicle involvement type, and accident description. The backend runs the input through the trained XGBoost model and returns a prediction with probability.
-
-### 3. Accident Map
-Interactive geospatial visualization showing:
-- Accident hotspots by municipality
-- Color-coded severity indicators
-- Filterable by year and accident type
-- Clickable markers with accident details
+ 
+The user selects a municipality, date/time, and vehicle involvement type. The backend runs the input through the trained XGBoost model and returns a prediction with probability score.
   
 ---
 
@@ -90,10 +94,18 @@ road-pulse/
 ## Machine Learning
 
 ### Problem
+
 Binary classification: predict whether a traffic accident will result in **injuries or fatalities** (class 1) vs. **material damage only** (class 0).
 
 ### Dataset
+
 ~205,000 accidents. Class distribution: ~60% material damage, ~40% injured/dead.
+
+### Data Quality Issues Found in EDA
+
+- **No missing values** in the raw dataset.
+- **Duplicate rows** were present — different accident IDs but identical data, likely from multiple reports of the same incident. Removed via deduplication on `accident_id`.
+- **Malformed coordinates** — ~32,125 rows (~16% of data) had longitude/latitude recorded without a decimal point due to a data entry error. These were detected and corrected before modeling.
 
 ### Features Used
 
@@ -124,21 +136,30 @@ The preprocessing pipeline (`scripts/preprocess.py`) handles:
 
 ### Models Evaluated
 
-Three models were trained and compared:
-- Logistic Regression (baseline)
-- Random Forest
-- **XGBoost** *(selected — best F1 and ROC-AUC)*
+Five configurations were trained and compared in `notebooks/model_comparison.ipynb`:
+ 
+| Model | Accuracy | F1 (Material) | F1 (Injured/Dead) | F1 (Macro) | AUC-ROC |
+|---|---|---|---|---|---|
+| **XGBoost (Tuned)** | ~0.73 | ~0.79 | ~0.64 | ~0.72 | **0.8031** |
+| Random Forest (Tuned) | ~0.73 | ~0.79 | ~0.64 | ~0.72 | 0.8027 |
+| XGBoost (Baseline) | ~0.72 | ~0.78 | ~0.63 | ~0.71 | ~0.80 |
+| Logistic Regression (Baseline) | ~0.70 | ~0.76 | ~0.61 | ~0.69 | ~0.79 |
+| Random Forest (Default) | — | — | — | — | < baseline |
+ 
+**XGBoost (Tuned)** was selected for the lowest false negative rate on the "Injured/Dead" class. The decision threshold was lowered from 0.5 to **0.45** to further improve recall — in a safety context, predicting "safe" when an accident was actually harmful is the costlier mistake.
+ 
+All tuned models converge around AUC ~0.80, suggesting the current feature set has reached its informational ceiling. Further improvement would likely require additional data not present in administrative records (vehicle speed, road conditions, driver state).
 
-### Key Results (XGBoost, tuned)
-
-| Metric | Value |
-|---|---|
-| Accuracy | ~value |
-| Macro F1 | ~value |
-| ROC-AUC | ~value |
-| Decision threshold | 0.45 (tuned to reduce false negatives) |
-
-The threshold was lowered from the default 0.5 to 0.45 to improve **recall on the "Injured/Dead" class** — in a safety context, it is more important to avoid predicting "safe" when the accident was actually harmful.
+---
+ 
+## Key Findings from EDA
+ 
+- **Rush hour effect:** Accidents peak sharply at **17h** (end of work day), with a secondary morning peak at **8h**.
+- **Weekday vs. weekend:** More accidents occur on weekdays in absolute terms, but the hourly distribution shifts on weekends — accidents spread more evenly across the day without the rush-hour spike.
+- **Seasonal pattern:** Summer months (June–August) show elevated accident counts, likely due to increased road activity and longer daylight hours.
+- **Type distribution:** ~60% of accidents result in material damage only; ~40% involve injuries or fatalities.
+- **Pedestrian accidents** have the highest injury rate of all vehicle involvement categories.
+- **Coordinate data quality:** ~16% of coordinate records were malformed (missing decimal point), requiring correction before any geographic analysis or modeling.
 
 ---
 
@@ -262,17 +283,15 @@ Response:
 
 ---
 
-## Key Findings from EDA
-
----
-
 ## Data Source
 
 All data is sourced from the official Serbian open data portal:  [data.gov.rs - Saobraćajne nesreće](https://data.gov.rs/sr/datasets/podatsi-o-saobratshajnim-nezgodama-po-politsijskim-upravama-i-opshtinama/)
 
 ---
 
-## Author
+## Author 
+
+**Github:** [github.com/sav0sav1c5/](https://github.com/sav0sav1c5)
 
 Built as a portfolio project to demonstrate end-to-end data science and full-stack development skills.
 

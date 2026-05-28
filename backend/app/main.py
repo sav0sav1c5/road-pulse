@@ -2,7 +2,8 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.app.db.database import engine, Base
+from backend.app.db.database import engine
+from backend.app.models.accident import Accident, Base
 from backend.app.api.accidents import router
 
 Base.metadata.create_all(bind=engine)

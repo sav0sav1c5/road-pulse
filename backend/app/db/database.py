@@ -16,10 +16,10 @@ engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
 # Klasa koja se nasledjuje da bi pravili modele
-Base = declarative_base()
+# Base = declarative_base()
 
-with engine.connect() as connection:
-    print("Successfully connected!")
+# with engine.connect() as connection:
+#     print("Successfully connected!")
 
 # Funkcija koja za svaki API poziv otvara sesiju ka bazi podataka i zatvara kad se zavrsi
 def get_db():

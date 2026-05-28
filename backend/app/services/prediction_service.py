@@ -12,37 +12,75 @@ os.chdir(project_root)
 
 print(f"Working directory: {os.getcwd()}")
 
-rf_model = joblib.load('models/rf_model_final.pkl')
-le_municipality = joblib.load('models/encoders/le_municipality.pkl')
-le_description = joblib.load('models/encoders/le_description.pkl')
+xgb_model = joblib.load('models/xgboost_tuned.pkl')
+mun_encoder = joblib.load('models/encoders/xgb_mun_target_encoder.pkl')
 
 THRESHOLD = 0.45
 
 from scripts.preprocess import preprocess
 
 FEATURES = [
-    'municipality_encoded', 'month', 'day_of_week', 'hour', 'acc_parked_vehicles',
-    'acc_pedestrians', 'acc_single_vehicle', 'acc_two_vehicles_no_turn',
-    'acc_two_vehicles_turn_or_cross', 'description_encoded'
+    'municipality',
+    'longitude',
+    'latitude',
+    'month',
+    'day_of_week',
+    'hour',
+    'day_type',
+    'is_rush',
+    'is_night',
+    'season',
+    'acc_parked_vehicles',
+    'acc_pedestrians',
+    'acc_single_vehicle',
+    'acc_two_vehicles_no_turn',
+    'acc_two_vehicles_turn_or_cross',
 ]
 
 def predict_severity(
     municipality: str,
-    description: str,
     involved_vehicles_num: str,
-    date_time: str
+    date_time: str,
+    longitude: float,
+    latitude: float,
 ) -> dict:
-    
+    """
+    Predicts accident severity based on context.
+ 
+    Parameters
+    ----------
+    municipality : p
+        The name of the municipality — must match the values rom the training data.
+    involved_vehicles_num : p
+        One of the five categories of vehicle participation (Serbian markings).
+    date_time : p
+        Date and time in ISO format, e.g. "2024-03-15 17:30:00".
+    longitude : float
+        Longitude of the location of the accident.
+    latitude : float
+        Latitude of the accident location.
+ 
+    Returns
+    -------
+    dict with keys:
+        "severity" – "Injured/Dead" or "Material"
+        "probability" – float between 0 and 1
+    """
+
     # Make dataframe
     df = pd.DataFrame([{
         'municipality': municipality,
-        'description': description,
         'involved_vehicles_num': involved_vehicles_num,
-        'date_time': pd.to_datetime(date_time)
+        'date_time': pd.to_datetime(date_time),
+        'longitude': longitude,
+        'latitude': latitude,
     }])
 
-    # 2. Preprocess data
-    df = preprocess(df, le_municipality, le_description)
+    # Preprocess data
+    df = preprocess(df)
+
+    # Target encoding for municipality feature
+    df['municipality'] = mun_encoder.transform(df['municipality'])
 
     # Add missing one-hot columns
     for col in FEATURES:
@@ -52,23 +90,12 @@ def predict_severity(
     # Select columns that model will use
     X = df[FEATURES]
 
-    # Predict accident severity
-    probability = rf_model.predict_proba(X)[0][1]
+    # Predict accident severity where predict_proba returns [[prob_0, prob_1]]
+    # We use [0][1] - prob_1 that probability of Injured/Dead
+    probability = xgb_model.predict_proba(X)[0][1]
     prediction = int(probability >= THRESHOLD)
-
-    # Probability percentage
-    # probability = round(probability * 100, 2)
 
     return {
         "severity": "Injured/Dead" if prediction == 1 else "Material",
         "probability": round(float(probability), 4)
     }
-
-# if __name__ == "__main__":
-#     result = predict_severity(
-#         municipality="BARAJEVO",
-#         description="Nezgoda sa jednim vozilom – silazak sa kolovoza u krivini",
-#         involved_vehicles_num="SN SA JEDNIM VOZILOM",
-#         date_time="2024-03-15 17:30:00"
-#     )
-#     print(result)

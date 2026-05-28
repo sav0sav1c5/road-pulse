@@ -96,9 +96,10 @@ def predict(
 ):
     result = predict_severity(
         municipality=request.municipality,
-        description=request.description,
         involved_vehicles_num=request.involved_vehicles_num,
-        date_time=request.date_time
+        date_time=request.date_time,
+        longitude=request.longitude,
+        latitude=request.latitude
     )
 
     return result

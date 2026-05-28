@@ -13,3 +13,8 @@ docs/
 .venv/
 **/.venv/
 .venv
+results/
+.idea/
+.vscode/
+.DS_Store
+*.env.local

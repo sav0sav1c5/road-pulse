@@ -5,7 +5,8 @@ class PredictionRequest(BaseModel):
     municipality: str
     date_time: datetime
     involved_vehicles_num: str
-    description: str
+    longitude: float
+    latitude: float
 
 class PredictionResponse(BaseModel):
     severity: str

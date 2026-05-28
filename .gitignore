@@ -13,6 +13,7 @@ dist/
 build/
 
 # Data (never commit raw xlsx files)
+data/
 data/raw/
 data/processed/
 

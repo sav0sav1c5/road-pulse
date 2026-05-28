@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from backend.app.db.database import get_db
-from backend.app.services.accident_service import get_all_accidents, get_accident_by_id, get_stats_by_department, get_stats_by_municipality, get_stats_by_hour, get_stats_by_year, get_stats_by_accident_type
+from backend.app.services.accident_service import get_all_accidents, get_accident_by_id, get_stats_by_department, get_stats_by_municipality, get_stats_by_hour, get_stats_by_year, get_stats_by_accident_type, get_map_points
 from backend.app.services.prediction_service import predict_severity
-from backend.app.schemas.accident import AccidentResponse, AccidentList, StatsList
+from backend.app.schemas.accident import AccidentResponse, AccidentList, StatsList, MapPointList
 from backend.app.schemas.prediction import PredictionRequest, PredictionResponse
 
 router = APIRouter(prefix='/api/v1', tags=['accidents'])
@@ -52,6 +52,17 @@ def stats_by_type(
     items = get_stats_by_accident_type(db)
 
     return StatsList(total_items=len(items), items=items)
+
+@router.get('/accidents/map', response_model=MapPointList)
+def get_map(
+    accident_type: str = Query(None),
+    municipality: str = Query(None),
+    db: Session = Depends(get_db)
+):
+    
+    items = get_map_points(db, accident_type=accident_type, municipality=municipality)
+    
+    return MapPointList(total=len(items), items=items)
 
 @router.get('/accidents', response_model=AccidentList)
 def get_accidents(

@@ -94,3 +94,30 @@ def get_stats_by_accident_type(db: Session):
     )
 
     return [{'label': row.accident_type, 'count': row.count} for row in rows]
+
+# Get map points for pins mapping on frontend
+def get_map_points(db: Session, accident_type: str = None, municipality: str = None):
+    query = db.query(
+        Accident.accident_id,
+        Accident.latitude,
+        Accident.longitude,
+        Accident.accident_type,
+        Accident.municipality,
+        Accident.date_time,
+    ).filter(
+        Accident.latitude.isnot(None),
+        Accident.longitude.isnot(None),
+        Accident.latitude.between(42, 47),
+        Accident.longitude.between(18, 24),
+    )
+
+    if accident_type:
+        query = query.filter(Accident.accident_type == accident_type)
+    if municipality:
+        query = query.filter(Accident.municipality == municipality)
+
+    # Without limit if municipality choosed, else limit 5000 samples
+    if municipality or accident_type:
+        return query.all()
+    else:
+        return query.limit(5000).all()

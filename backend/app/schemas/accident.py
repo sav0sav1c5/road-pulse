@@ -32,3 +32,20 @@ class StatsItem(BaseModel):
 class StatsList(BaseModel):
     total_items: int
     items: List[StatsItem]
+
+# Map point classes
+
+class MapPoint(BaseModel):
+    accident_id: int
+    latitude: float
+    longitude: float
+    accident_type: str
+    municipality: str
+    date_time: datetime
+
+    class Config:
+        from_attributes = True
+
+class MapPointList(BaseModel):
+    total: int
+    items: List[MapPoint]

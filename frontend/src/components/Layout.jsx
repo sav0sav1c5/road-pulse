@@ -4,6 +4,7 @@ import { NavLink } from "react-router-dom";
 const NAV_ITEMS = [
     { to: '/',        label: 'Statistics',},
     { to: '/predict', label: 'Prediction'},
+    { to: '/map', label: 'Map' },
 ]
 
 // 'children' param - everything between <Layout> and </Layout> will be available as 'children'

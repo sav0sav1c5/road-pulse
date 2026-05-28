@@ -45,6 +45,15 @@ export function getStatsByType() {
     return apiFetch(`/accidents/statistics/type`);
 }
 
+export function getMapPoints(filters = {}) {
+    const params = new URLSearchParams()
+    
+    if (filters.accident_type) params.append('accident_type', filters.accident_type)
+    if (filters.municipality)  params.append('municipality', filters.municipality)
+    
+    return apiFetch(`/accidents/map?${params.toString()}`)
+}
+
 export function predictSeverity(data) {
     return fetch(`${BASE_URL}/predict`, {
         method: "POST",

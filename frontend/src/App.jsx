@@ -3,6 +3,8 @@ import Layout from './components/Layout';
 import AccidentsPage from './pages/AccidentsPage';
 import StatsPage from './pages/StatsPage';
 import PredictPage from './pages/PredictPage';
+import MapPage from './pages/MapPage'
+
 import './App.css'
 
 function App() {
@@ -12,6 +14,7 @@ function App() {
                 <Routes>
                     <Route path='/' element={<StatsPage/>}></Route>
                     <Route path='/predict' element={<PredictPage/>}></Route>
+                    <Route path='/map' element={<MapPage/>}></Route>
                 </Routes>
             </Layout>
         </BrowserRouter>
